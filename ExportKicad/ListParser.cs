@@ -120,6 +120,7 @@ namespace Rop.Kicad
 		public IntValue(int v) : base(v) { }
 		public static IntValue Factory(string s)
 		{
+            if ((s == "-") || (s == "+")) return null;
 			if (!_reg.IsMatch(s)) return null;
 			return new IntValue(int.Parse(s));
 		}
@@ -415,6 +416,9 @@ namespace Rop.Kicad
 						case ISimplify simp:
 							v = simp.Simplify(p.FieldType);
 							break;
+                        case Drill d:
+                            v = d.Size;
+                            break;
 						default:
 							throw new Exception("Imposible conversion");
 					}

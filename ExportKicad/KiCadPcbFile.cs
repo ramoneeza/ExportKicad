@@ -63,7 +63,27 @@ namespace Rop.Kicad
 		public Point Point() => new Point(X, Y);
 		public Double Radianes => Math.PI*R / 180.0;
 	}
-	public class PcbFile
+
+    public struct Drill
+    {
+        public double Size;
+        public Point Offset;
+        public override string ToString()
+        {
+            if ((Offset.X == 0) && (Offset.Y == 0))
+                return $"{(int)Size * 1000}";
+            else
+                return $"{(int)Size * 1000}_{(int)Offset.X * 1000}_{(int)Offset.Y * 1000}";
+        }
+        public Drill(double s,Point off)
+        {
+            Size = s;
+            Offset = off;
+        }
+        public static implicit operator double(Drill d) => d.Size;
+    }
+
+    public class PcbFile
 	{
 		public string Version { get; set; }
 		public string Host { get;  set; }
@@ -273,10 +293,10 @@ namespace Rop.Kicad
 			public At At;
 			public LayersSection Layers;
 			public string[] DwgLayers => Layers.Layers.Select(l => l.Name).ToArray();
-			public Double Drill;
+			public Drill Drill;
 			public Size Size;
 			public int Net;
-			public string Key => $"P_{Shape}_{(int)(Size.Width*1000)}_{(int)(Size.Height*1000)}_{(int)(Drill*1000)}";
+			public string Key => $"P_{Shape}_{(int)(Size.Width*1000)}_{(int)(Size.Height*1000)}_{Drill}";
 		}
 		public class Via : IDwgElement
 		{
@@ -306,8 +326,9 @@ namespace Rop.Kicad
 			public Size Size;
 			public double Thickness;
 		}
-		//(fp_text reference REF** (at 0 -3.5) (layer F.SilkS) hide	(effects (font (size 1 1) (thickness 0.15)))   )
-		public class Fp_Text : IDwgElement
+        
+        //(fp_text reference REF** (at 0 -3.5) (layer F.SilkS) hide	(effects (font (size 1 1) (thickness 0.15)))   )
+        public class Fp_Text : IDwgElement
 		{
 			public At At;
 			public string Layer;
@@ -334,7 +355,7 @@ namespace Rop.Kicad
 				Value = new Rectangle(v[0], v[1], v[2], v[3]);
 			}
 		}
-		[FactoryName("start", "center","end","aux_axis_origin","grid_origin")]
+		[FactoryName("start", "center","end","aux_axis_origin","grid_origin","offset")]
 		public class PointToken : ComplexToken<Point>
 		{
 			public PointToken(List l) : base(l.Name)
@@ -419,6 +440,7 @@ namespace Rop.Kicad
 				Z = z;
 			}
 		}
+
 		[FactoryName("xyz")]
 		public class Xyztoken : ComplexToken<xyz>
 		{
@@ -428,8 +450,20 @@ namespace Rop.Kicad
 				Value = new xyz(v[0], v[1], v[2]);
 			}
 		}
-		
-		[FactoryName("general")]
+        
+        [FactoryName("drill")]
+        public class Drilltoken : ComplexToken<Drill>
+        {
+            public Drilltoken(List l) : base(l.Name)
+            {
+                var v = l.Values;
+                var o = new Point();
+                if (v.Length > 1) o = (Point)v[1];
+                Value = new Drill(Convert.ToDouble(v[0]), o);
+            }
+        }
+
+        [FactoryName("general")]
 		public class GeneralToken : ClassToken<PcbFile.GeneralSection>{	public GeneralToken(List l) : base(l) { }}
 
 		[FactoryName("setup")]
@@ -448,7 +482,9 @@ namespace Rop.Kicad
 				this.Value.name = (tokens.Length>1)?(string)(tokens[1]):null;
 			}
 		}
-		[FactoryName("Net_class")]
+        
+
+        [FactoryName("Net_class")]
 		public class Net_Class : ClassToken<PcbFile.Net_Class>
 		{
 			public Net_Class(List l):base(l)

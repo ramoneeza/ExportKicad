@@ -467,19 +467,21 @@ namespace Rop.Kicad
 			sh.Outline.Width = 0;
 			if (pad.Drill > 0)
 			{
-				
-				if (!SkipDrillSize)
+                var ptodrill = pto;
+                ptodrill.X += pad.Drill.Offset.X;
+                ptodrill.Y -= pad.Drill.Offset.Y;
+                if (!SkipDrillSize)
 				{
-					var sh2 = FillCircleByDiameter(la.Layer,pto,pad.Drill,"White");
+					var sh2 = FillCircleByDiameter(la.Layer,ptodrill,pad.Drill,"White");
 					sh = GroupShapes(sh, sh2);
 				}
 				else
 				{
-					var sh2= FillCircleByDiameter(la.Layer, pto, 0.5, "White");
+					var sh2= FillCircleByDiameter(la.Layer, ptodrill, 0.5, "White");
 					Shape sh3 = null;
 					if (MarkBigDrill&&(pad.Drill>1))
 					{
-						sh3 = CircleByDiameter(la.Layer, pto, pad.Drill - 0.3, null, 0.2, App.CreateColor("White"), true);
+						sh3 = CircleByDiameter(la.Layer, ptodrill, pad.Drill - 0.3, null, 0.2, App.CreateColor("White"), true);
 					}
 					sh = GroupShapes(sh, sh2, sh3);
 				}
