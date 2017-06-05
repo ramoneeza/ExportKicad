@@ -469,7 +469,7 @@ namespace Rop.Kicad
 			{
                 var ptodrill = pto;
                 ptodrill.X += pad.Drill.Offset.X;
-                ptodrill.Y -= pad.Drill.Offset.Y;
+                ptodrill.Y += pad.Drill.Offset.Y;
                 if (!SkipDrillSize)
 				{
 					var sh2 = FillCircleByDiameter(la.Layer,ptodrill,pad.Drill,"White");

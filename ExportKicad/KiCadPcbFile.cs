@@ -71,9 +71,9 @@ namespace Rop.Kicad
         public override string ToString()
         {
             if ((Offset.X == 0) && (Offset.Y == 0))
-                return $"{(int)Size * 1000}";
+                return $"{(int)(Size * 1000)}";
             else
-                return $"{(int)Size * 1000}_{(int)Offset.X * 1000}_{(int)Offset.Y * 1000}";
+                return $"{(int)(Size * 1000)}_{(int)(Offset.X * 1000)}_{(int)(Offset.Y * 1000)}";
         }
         public Drill(double s,Point off)
         {
@@ -565,7 +565,7 @@ namespace Rop.Kicad
 			public Pad(List l) : base(l)
 			{
 				var vs=l.Values;
-				this.Value.Number = Convert.ToInt32(vs[0]);
+				this.Value.Number =(vs[0] is int)?Convert.ToInt32(vs[0]):0;
 				this.Value.Type = Convert.ToString(vs[1]);
 				this.Value.Shape = Convert.ToString(vs[2]);
 			}
